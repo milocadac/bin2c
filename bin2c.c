@@ -4,10 +4,9 @@
 #include <string.h>
 
 #define MAX_N_BLOCKS 8
-#define KILOBYTE 1024
 
 int main(int argc, char** argv) {
-	assert(argc == 3);
+	assert(argc == 4);
 	size_t len = strlen(argv[1]);
 	char * txt_file_name = malloc(len+1+4); //Add 4 for ".txt"
 	char * block_txt_file_name = malloc(sizeof(txt_file_name)+2);
@@ -15,25 +14,19 @@ int main(int argc, char** argv) {
 	char* fn = argv[1];
 	int file_size;
 	int block_size;
-	sscanf(argv[2], "%d", &block_size);
 	int current_block_size;
-
-	FILE* f = fopen(fn, "rb");
-	FILE* txt_file[MAX_N_BLOCKS] = {}; //Array of file pointers for write
-	char txt_file_label[2] = {};
-    unsigned long n;
-
-    fseek(f, 0L, SEEK_END);
-    file_size = ftell(f); //Get file size
-    rewind(f);
-
-    printf("File size: %d bytes\n", file_size);
-
+	sscanf(argv[2], "%d", &file_size);
+	sscanf(argv[3], "%d", &block_size);
 	int n_blocks = file_size/block_size;
 	int last_block_size = file_size%block_size;
 
 	if(last_block_size != 0)
         n_blocks++;
+
+	FILE* f = fopen(fn, "rb");
+	FILE* txt_file[MAX_N_BLOCKS] = {}; //Array of file pointers for write
+	char txt_file_label[2] = {};
+    unsigned long n;
 
 	for(int i = 0; i < n_blocks; i++)
     {
@@ -41,6 +34,8 @@ int main(int argc, char** argv) {
         strcpy(block_txt_file_name, txt_file_name); //Get the name of the file
         strcat(block_txt_file_name, txt_file_label); //Label file
         strcat(block_txt_file_name, ".txt"); //and add txt extension
+
+        //printf(block_txt_file_name);
 
         if((i == n_blocks-1)&&(last_block_size!=0))
             current_block_size = last_block_size; //Last block case
@@ -67,11 +62,4 @@ int main(int argc, char** argv) {
 	}
 
 	fclose(f);
-
-	printf("Done. %d text files created in maximum block sizes of ", n_blocks);
-	if(block_size%KILOBYTE == 0)
-        printf("exactly ");
-    else
-        printf("approximately ");
-    printf("%d kB each.\n", block_size/KILOBYTE);
 }
